@@ -1,9 +1,10 @@
 import ImageGalleryItem from "../ImageGalleryItem/ImageGalleryItem";
 
-const ImageGallery = () => {
+const ImageGallery = ({ items, showItems }) => {
   return (
-    <ul className="gallery">
-      <ImageGalleryItem />
+    <ul className="ImageGallery">
+      {showItems &&
+        items.map((item) => <ImageGalleryItem item={item} key={item.id} />)}
     </ul>
   );
 };
