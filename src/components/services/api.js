@@ -6,6 +6,8 @@ export const searchImgs = async (value, apiKey, page) => {
   const { data } = await axios.get(
     `https://pixabay.com/api/?q=${value}&page=${page}&key=${apiKey}&image_type=photo&orientation=horizontal&per_page=12`
   );
+  //   throw new Error("oops ! some error");
+
   return data;
 };
 

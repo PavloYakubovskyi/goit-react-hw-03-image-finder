@@ -13,6 +13,7 @@ const Searchbar = ({ onSubmit }) => {
         <input
           className="SearchForm-input"
           type="text"
+          name="search"
           // autocomplete="off"
           // autofocus
           placeholder="Search images and photos"

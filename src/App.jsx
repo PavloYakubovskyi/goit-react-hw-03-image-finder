@@ -4,6 +4,7 @@ import Button from "./components/Button/Button";
 import ImageGallery from "./components/ImageGallery/ImageGallery";
 import Searchbar from "./components/Searchbar/Searchbar";
 import * as API from "./components/services/api";
+import Loader from "./components/Loader/Loader";
 
 const API_KEY = "38952282-40725538619d219cb8ed057cd";
 
@@ -16,21 +17,27 @@ export default class App extends Component {
     error: null,
   };
 
+
   serachAllimages = async () => {
+    this.setState({ isLoading: true });
+
     const { searchImages, page } = this.state;
     try {
       const res = await API.searchImgs(searchImages, API_KEY, page);
-      console.log("res: ", res.hits);
+      // console.log("res: ", res.hits);
 
       this.setState({ gallery: res.hits });
-    } catch (error) {}
+    } catch (error) {
+      this.setState({ error: error.message });
+    } finally {
+      // вимикаємо індикатор завантаження в файналі бо тут відпрацює в любому випадку не залежно як проміс виконався
+      this.setState({ isLoading: false });
+    }
   };
 
   componentDidMount() {
     this.serachAllimages();
   }
-
-  onSubmit = (value) => {};
 
   render() {
     const { gallery, searchImages } = this.state;
@@ -39,7 +46,9 @@ export default class App extends Component {
 
     return (
       <div className="App">
-        <Searchbar onSubmit={this.onSubmit} />
+        <Searchbar onSubmit={this.handleSearchSubmit} />
+        {this.state.isLoading && <Loader />}
+        {this.state.error && <p className="error">{this.state.error}</p>}
         <ImageGallery
           items={gallery}
           searchValue={searchImages}
