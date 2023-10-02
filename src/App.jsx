@@ -5,6 +5,7 @@ import ImageGallery from "./components/ImageGallery/ImageGallery";
 import Searchbar from "./components/Searchbar/Searchbar";
 import * as API from "./components/services/api";
 import Loader from "./components/Loader/Loader";
+import { useState } from "react";
 
 const API_KEY = "38952282-40725538619d219cb8ed057cd";
 
@@ -16,7 +17,6 @@ export default class App extends Component {
     isLoading: false,
     error: null,
   };
-
 
   serachAllimages = async () => {
     this.setState({ isLoading: true });
@@ -39,6 +39,14 @@ export default class App extends Component {
     this.serachAllimages();
   }
 
+  onSubmit = (values) => {
+    if (values.search === this.state.searchImages) {
+      alert("Ви саме зараз це і шукаєте");
+      return;
+    }
+    this.setState({ searchImages: values.search, gallery: [], page: 1 });
+  };
+
   render() {
     const { gallery, searchImages } = this.state;
     const showItems =
@@ -46,7 +54,7 @@ export default class App extends Component {
 
     return (
       <div className="App">
-        <Searchbar onSubmit={this.handleSearchSubmit} />
+        <Searchbar onSubmit={this.onSubmit} />
         {this.state.isLoading && <Loader />}
         {this.state.error && <p className="error">{this.state.error}</p>}
         <ImageGallery

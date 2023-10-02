@@ -1,24 +1,34 @@
+import { Field, Form, Formik } from "formik";
 import { FcSearch } from "react-icons/fc";
 
 const Searchbar = ({ onSubmit }) => {
+  const handleSubmit = async (values, { setSubmitting }) => {
+    await onSubmit(values);
+    setSubmitting(false);
+  };
+
   return (
     <header className="Searchbar">
-      <form className="SearchForm">
-        <button type="submit" className="SearchForm-button">
-          <span className="SearchForm-button-label">
-            <FcSearch />
-          </span>
-        </button>
+      <Formik initialValues={{ search: "" }} onSubmit={handleSubmit}>
+        {({ isSubmitting }) => (
+          <Form className="SearchForm" autoComplete="off">
+            <button type="submit" className="SearchForm-button">
+              <span className="SearchForm-button-label">
+                <FcSearch />
+              </span>
+            </button>
 
-        <input
-          className="SearchForm-input"
-          type="text"
-          name="search"
-          // autocomplete="off"
-          // autofocus
-          placeholder="Search images and photos"
-        />
-      </form>
+            <Field
+              className="SearchForm-input"
+              type="text"
+              name="search"
+              // autocomplete="off"
+              // autofocus
+              placeholder="Search images and photos"
+            />
+          </Form>
+        )}
+      </Formik>
     </header>
   );
 };
