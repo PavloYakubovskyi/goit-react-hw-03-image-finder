@@ -5,64 +5,86 @@ import ImageGallery from "./components/ImageGallery/ImageGallery";
 import Searchbar from "./components/Searchbar/Searchbar";
 import * as API from "./components/services/api";
 import Loader from "./components/Loader/Loader";
-import { useState } from "react";
 
 const API_KEY = "38952282-40725538619d219cb8ed057cd";
 
 export default class App extends Component {
   state = {
-    gallery: null,
-    searchImages: "",
+    gallery: [],
+    searchValue: "",
     page: 1,
-    isLoading: false,
-    error: null,
+    totalImgs: 0,
+    status: "idle",
   };
 
-  serachAllimages = async () => {
-    this.setState({ isLoading: true });
+  async componentDidUpdate(prevProps, prevState) {
+    const { searchValue, page } = this.state;
 
-    const { searchImages, page } = this.state;
-    try {
-      const res = await API.searchImgs(searchImages, API_KEY, page);
-      // console.log("res: ", res.hits);
+    if (prevState.searchValue !== searchValue || prevState.page !== page) {
+      this.setState({ status: "pending" });
+      try {
+        const res = await API.searchImgs(searchValue, API_KEY, page);
+        // console.log("res: ", res);
 
-      this.setState({ gallery: res.hits });
-    } catch (error) {
-      this.setState({ error: error.message });
-    } finally {
-      // вимикаємо індикатор завантаження в файналі бо тут відпрацює в любому випадку не залежно як проміс виконався
-      this.setState({ isLoading: false });
+        if (res.totalHits === 0) {
+          return this.setState({
+            status: "rejected",
+          });
+        }
+        this.setState((s) => ({
+          gallery: [...s.gallery, ...res.hits],
+          totalImgs: res.totalHits,
+          status: "resolved",
+        }));
+      } catch (error) {
+        this.setState({
+          status: "rejected",
+        });
+        // console.log(error);
+      }
     }
-  };
-
-  componentDidMount() {
-    this.serachAllimages();
   }
 
   onSubmit = (values) => {
-    if (values.search === this.state.searchImages) {
-      alert("Ви саме зараз це і шукаєте");
+    if (values.search === this.state.searchValue) {
+      alert("Ви це вже знайшли");
       return;
     }
-    this.setState({ searchImages: values.search, gallery: [], page: 1 });
+    this.setState({ searchValue: values.search, gallery: [], page: 1 });
+  };
+
+  onLoadMore = () => {
+    this.setState((s) => ({ page: s.page + 1 }));
   };
 
   render() {
-    const { gallery, searchImages } = this.state;
-    const showItems =
-      Array.isArray(this.state.gallery) && this.state.gallery.length;
+    const { gallery, searchValue, totalImgs, status } = this.state;
 
     return (
       <div className="App">
         <Searchbar onSubmit={this.onSubmit} />
-        {this.state.isLoading && <Loader />}
-        {this.state.error && <p className="error">{this.state.error}</p>}
+        {status === "idle" && (
+          <p className="start-text">Please enter your request</p>
+        )}
+        {status === "rejected" && (
+          <p className="start-text">
+            Sorry, no result at your request "{searchValue}"
+          </p>
+        )}
+
         <ImageGallery
           items={gallery}
-          searchValue={searchImages}
-          showItems={showItems}
+          status={status}
+          searchValue={searchValue}
         />
-        <Button>Load more</Button>
+
+        {status === "pending" && <Loader />}
+
+        {gallery.length !== 0 && totalImgs > 12 && gallery.length % 2 === 0 && (
+          <Button onClick={this.onLoadMore} classname={"Button"}>
+            Load more
+          </Button>
+        )}
       </div>
     );
   }

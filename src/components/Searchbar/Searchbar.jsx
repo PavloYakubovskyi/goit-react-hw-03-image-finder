@@ -3,6 +3,7 @@ import { FcSearch } from "react-icons/fc";
 
 const Searchbar = ({ onSubmit }) => {
   const handleSubmit = async (values, { setSubmitting }) => {
+    // console.log("values: ", values);
     await onSubmit(values);
     setSubmitting(false);
   };
